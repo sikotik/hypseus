@@ -33,6 +33,7 @@ extern "C" {
 // by RDG2010
 // Ubuntu Linux complains with plain <SDL.h>
 #include <SDL.h> // only used for threading
+#include <mpeg2.h>
 
 struct yuv_buf {
     uint8_t *Y;     // Y channel

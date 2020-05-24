@@ -449,6 +449,9 @@ bool parse_cmd_line(int argc, char **argv)
                        // framefile
     int i                 = 0;
 
+    bool log_was_disabled = false; // if we actually get "-nolog" while going
+                                   // through arguments
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     set_scoreboard(0);      // Now this is a bitmapped type, so set it to NONE to start
@@ -695,7 +698,7 @@ bool parse_cmd_line(int argc, char **argv)
 
             // disable log file
             else if (strcasecmp(s, "-nolog") == 0) {
-                set_log_was_disabled(true);
+                log_was_disabled = true;
             }
 
             // by RDG2010
@@ -900,7 +903,20 @@ bool parse_cmd_line(int argc, char **argv)
     else {
         result = false;
     }
+     // if we didn't receive "-nolog" while parsing, then it's ok to enable the
+    // log file now.
+    if (!log_was_disabled) {
+        // first we need to delete the old logfile so we can start fresh
+        // (this is the best place to do it since up until this point we don't
+        // know where our homedir is)
+        string logfile = g_homedir.get_homedir();
+        logfile += "/";
+        logfile += LOGNAME;
+        unlink(logfile.c_str()); // delete logfile if possible, because we're
+                                 // starting over
 
+        set_log_enabled(true);
+    }
     return (result);
 }
 

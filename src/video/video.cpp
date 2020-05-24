@@ -707,7 +707,7 @@ int vid_update_yuv_overlay ( uint8_t *Yplane, uint8_t *Uplane, uint8_t *Vplane,
     if (g_yuv_video_needs_update) {
         // We still have a surface update that has not been transferred to texture,
         // so we get to wait until it's done and we are told so.
-        SDL_CondWait(g_yuv_surface->pending_update_cond, g_yuv_surface->mutex);
+        SDL_CondWaitTimeout(g_yuv_surface->pending_update_cond, g_yuv_surface->mutex, 100);
     }
 
     memcpy (g_yuv_surface->Yplane, Yplane, g_yuv_surface->Ysize);	
@@ -740,14 +740,11 @@ void vid_update_overlay_surface (SDL_Surface *tx, int x, int y) {
 
     // MAC: 8bpp to RGBA8888 conversion. Black pixels are considered totally transparent so they become 0x00000000;
     for (int i = 0; i < (tx->w * tx->h); i++){
-        if (     *(  ((uint8_t*)tx->pixels)+i ) != 0x00   ) {
-	    *((uint32_t*)(g_screen_blitter->pixels)+i) = //0xff0000ff;
+        *((uint32_t*)(g_screen_blitter->pixels)+i) = //0xff0000ff;
 	    (0x00000000 | tx->format->palette->colors[*((uint8_t*)(tx->pixels)+i)].r) << 24|
 	    (0x00000000 | tx->format->palette->colors[*((uint8_t*)(tx->pixels)+i)].g) << 16|
 	    (0x00000000 | tx->format->palette->colors[*((uint8_t*)(tx->pixels)+i)].b) << 8|
-	    0x000000ff;
-        }
-        else *((uint32_t*)(g_screen_blitter->pixels)+i) = 0x00000000;
+	    (0x00000000 | tx->format->palette->colors[*((uint8_t*)(tx->pixels)+i)].a);
     }
     g_overlay_needs_update = true;
     // MAC: We update the overlay texture later, just when we are going to SDL_RenderCopy() it to the renderer.

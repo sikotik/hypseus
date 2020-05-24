@@ -62,9 +62,6 @@ void set_startsilent(unsigned char value);
 unsigned char get_startsilent();
 // end edit
 
-// added by MAC for -nolog
-void set_log_was_disabled(bool value);
-// end edit
 
 #endif // DAPHNE_H
 
